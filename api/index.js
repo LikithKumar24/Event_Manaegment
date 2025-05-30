@@ -25,6 +25,9 @@ app.use(
    })
 );
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 mongoose.connect(process.env.MONGO_URL);
 
 const storage = multer.diskStorage({
@@ -32,7 +35,9 @@ const storage = multer.diskStorage({
       cb(null, "uploads/");
    },
    filename: (req, file, cb) => {
-      cb(null, file.originalname);
+      // Generate unique filename with original extension
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + path.extname(file.originalname));
    },
 });
 
@@ -127,11 +132,13 @@ const Event = mongoose.model("Event", eventSchema);
 app.post("/createEvent", upload.single("image"), async (req, res) => {
    try {
       const eventData = req.body;
-      eventData.image = req.file ? req.file.path : "";
+      // Store the path that will be accessible from frontend
+      eventData.image = req.file ? `/uploads/${req.file.filename}` : "";
       const newEvent = new Event(eventData);
       await newEvent.save();
       res.status(201).json(newEvent);
    } catch (error) {
+      console.error('Error creating event:', error);
       res.status(500).json({ error: "Failed to save the event to MongoDB" });
    }
 });

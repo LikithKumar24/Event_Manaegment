@@ -35,11 +35,41 @@ export default function AddEvent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Create FormData object for file upload
+    const formDataToSend = new FormData();
+    
+    // Append all form fields to FormData
+    Object.keys(formData).forEach(key => {
+      if (key === 'image' && formData[key] instanceof File) {
+        formDataToSend.append('image', formData[key]);
+      } else {
+        formDataToSend.append(key, formData[key]);
+      }
+    });
+
     axios
-      .post("/createEvent", formData)
+      .post("/createEvent", formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
       .then((response) => {
         console.log("Event posted successfully:", response.data);
-        
+        // Clear form or redirect
+        setFormData({
+          owner: user? user.name : "",
+          title: "",
+          optional: "",
+          description: "",
+          organizedBy: "",
+          eventDate: "",
+          eventTime: "",
+          location: "",
+          ticketPrice: 0,
+          image: '',
+          likes: 0
+        });
       })
       .catch((error) => {
         console.error("Error posting event:", error);
