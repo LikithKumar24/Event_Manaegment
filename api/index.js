@@ -1,6 +1,7 @@
+require('dotenv').config();
+
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
 const mongoose = require("mongoose");
 const UserModel = require("./models/User");
 const bcrypt = require("bcryptjs");
@@ -14,21 +15,26 @@ const Ticket = require("./models/Ticket");
 const app = express();
 
 const bcryptSalt = bcrypt.genSaltSync(10);
-const jwtSecret = "bsbsfbrnsftentwnnwnwn";
+const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_do_not_use_in_production';
+
+// CORS configuration
+app.use(cors({
+  credentials: true,
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173'
+}));
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(
-   cors({
-      credentials: true,
-      origin: "http://localhost:5173",
-   })
-);
-
-// Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-mongoose.connect(process.env.MONGO_URL);
+// MongoDB connection
+mongoose.connect(process.env.MONGODB_URL)
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+  });
 
 const storage = multer.diskStorage({
    destination: (req, file, cb) => {
@@ -394,7 +400,13 @@ app.get("/admin/analytics", isAdmin, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-   console.log(`Server is running on port ${PORT}`);
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something broke!' });
+});
+
+const port = process.env.PORT || 4000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
