@@ -80,6 +80,7 @@ app.post("/login", async (req, res) => {
       {
          email: userDoc.email,
          id: userDoc._id,
+         isAdmin: userDoc.isAdmin
       },
       jwtSecret,
       {},
@@ -87,7 +88,12 @@ app.post("/login", async (req, res) => {
          if (err) {
             return res.status(500).json({ error: "Failed to generate token" });
          }
-         res.cookie("token", token).json(userDoc);
+         res.cookie("token", token).json({
+           _id: userDoc._id,
+           name: userDoc.name,
+           email: userDoc.email,
+           isAdmin: userDoc.isAdmin
+         });
       }
    );
 });
@@ -258,6 +264,134 @@ app.delete("/tickets/:id", async (req, res) => {
       console.error("Error deleting ticket:", error);
       res.status(500).json({ error: "Failed to delete ticket" });
    }
+});
+
+// Admin middleware to check if user is admin
+const isAdmin = async (req, res, next) => {
+  const { token } = req.cookies;
+  if (!token) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  try {
+    const userData = jwt.verify(token, jwtSecret);
+    const user = await UserModel.findById(userData.id);
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+    next();
+  } catch (error) {
+    res.status(401).json({ error: "Not authenticated" });
+  }
+};
+
+// Create admin account if it doesn't exist
+const createAdminAccount = async () => {
+  try {
+    const adminExists = await UserModel.findOne({ email: "admin@gmail.com" });
+    if (!adminExists) {
+      await UserModel.create({
+        name: "Admin",
+        email: "admin@gmail.com",
+        password: bcrypt.hashSync("984434", bcryptSalt),
+        isAdmin: true
+      });
+      console.log("Admin account created successfully");
+    }
+  } catch (error) {
+    console.error("Error creating admin account:", error);
+  }
+};
+
+// Call createAdminAccount when server starts
+createAdminAccount();
+
+// Admin routes
+app.get("/admin/users", isAdmin, async (req, res) => {
+  try {
+    const users = await UserModel.find({}, { password: 0 }); // Exclude password from response
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+app.get("/admin/events", isAdmin, async (req, res) => {
+  try {
+    const events = await Event.find();
+    res.json(events);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch events" });
+  }
+});
+
+// Delete user route
+app.delete("/admin/users/:id", isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (id === req.user?.id) {
+      return res.status(400).json({ error: "Cannot delete your own admin account" });
+    }
+    await UserModel.findByIdAndDelete(id);
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete user" });
+  }
+});
+
+// Delete event route
+app.delete("/admin/events/:id", isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Event.findByIdAndDelete(id);
+    res.status(200).json({ message: "Event deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete event" });
+  }
+});
+
+// Get analytics data
+app.get("/admin/analytics", isAdmin, async (req, res) => {
+  try {
+    const totalUsers = await UserModel.countDocuments();
+    const totalEvents = await Event.countDocuments();
+    const totalTickets = await Ticket.countDocuments();
+    
+    // Get events by date
+    const events = await Event.find({}, 'eventDate ticketPrice');
+    
+    // Calculate total revenue
+    const totalRevenue = await Ticket.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$price" }
+        }
+      }
+    ]);
+
+    // Get upcoming events count
+    const upcomingEvents = await Event.countDocuments({
+      eventDate: { $gte: new Date() }
+    });
+
+    // Get past events count
+    const pastEvents = await Event.countDocuments({
+      eventDate: { $lt: new Date() }
+    });
+
+    res.json({
+      totalUsers,
+      totalEvents,
+      totalTickets,
+      totalRevenue: totalRevenue[0]?.total || 0,
+      upcomingEvents,
+      pastEvents,
+      events
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch analytics" });
+  }
 });
 
 const PORT = process.env.PORT || 4000;

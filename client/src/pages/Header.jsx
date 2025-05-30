@@ -153,6 +153,13 @@ export default function Header() {
               
               <BsFillCaretDownFill className="h-5 w-5 cursor-pointer hover:rotate-180 transition-all" onClick={() => setisMenuOpen(!isMenuOpen)}/>
             </div>
+            {user.isAdmin && (
+              <Link to="/admin" className="hidden md:flex">
+                <button className="primary">
+                  ADMIN
+                </button>
+              </Link>
+            )}
             <div className="hidden md:flex">
               <button onClick={logout} className="secondary">
                 <div>Log out</div>
@@ -196,6 +203,12 @@ export default function Header() {
                 <Link className="flex hover:bg-background hover:shadow py-2 pl-6 pr-8 rounded-lg" to={'/calendar'}>
                   <div>Calendar</div>
                 </Link>
+
+                {user.isAdmin && (
+                  <Link className="flex hover:bg-background hover:shadow py-2 pl-6 pr-8 rounded-lg" to={'/admin'}>
+                    <div>Admin Dashboard</div>
+                  </Link>
+                )}
 
                 <Link className="flex hover:bg-background hover:shadow py-2 pl-6 pb-3 pr-8 rounded-lg" onClick={logout}>
                   Log out

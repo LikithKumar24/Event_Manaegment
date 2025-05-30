@@ -54,14 +54,13 @@ export default function RegisterPage() {
         </div>   
       
     </div>
-      <div className= "bg-white w-full sm:w-full md:w-1/2 lg:w-1/3 px-7 py-7 rounded-xl justify-center align-middle ">
+      <div className= "bg-gradient-to-br from-gray-800 to-gray-900 text-white w-full sm:w-full md:w-1/2 lg:w-1/3 px-7 py-7 rounded-xl justify-center align-middle shadow-xl">
     
         <form className="flex flex-col w-auto items-center" onSubmit={registerUser}>
-            <h1 className='px-3 font-extrabold mb-5 text-primarydark text-2xl'>Sign Up</h1>
+            <h1 className='px-3 font-extrabold mb-5 text-white text-2xl'>Sign Up</h1>
 
-            <div className= "input">
-              {/* <img src={account} alt="Name" className="name"/> */}
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+            <div className="input bg-gray-700 bg-opacity-50 border-gray-600">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-gray-300">
                 <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clipRule="evenodd" />
               </svg>
 
@@ -96,34 +95,26 @@ export default function RegisterPage() {
 
             
             <div className="w-full py-4">
-              <button type="submit" className="primary w-full"> Create Account </button>
+              <button type="submit" className="primary w-full hover:bg-blue-600 transition-colors"> Create Account </button>
             </div>
 
-            <div className="container2">
-              <div className="w-full h-full p-1">
-                <Link to={'/login'}>
-                  <button type="submit" className="text-black cursor-pointer rounded w-full h-full font-bold" > Sign In</button>
-                </Link>
-              </div>
-              <div className="w-full h-full p-1">
-                <Link to={'/register'}>
-                  <button type="submit" className="text-white cursor-pointer rounded w-full h-full bg-primary font-bold" > Sign Up</button>
-                </Link>
-              </div>
+            <div className="text-center mt-4">
+              <span className="text-gray-400">Already have an account? </span>
+              <Link to={"/login"} className="text-blue-400 hover:text-blue-300 font-semibold">
+                Sign In
+              </Link>
             </div>
 
-            <Link to={'/'} className="">
-              <button className="secondary">
+            <Link to={'/'}>
+              <button type="button" className="secondary hover:bg-gray-700 transition-colors mt-4">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                   <path fillRule="evenodd" d="M11.03 3.97a.75.75 0 010 1.06l-6.22 6.22H21a.75.75 0 010 1.5H4.81l6.22 6.22a.75.75 0 11-1.06 1.06l-7.5-7.5a.75.75 0 010-1.06l7.5-7.5a.75.75 0 011.06 0z" clipRule="evenodd" />
                 </svg> 
                 Back 
               </button>
             </Link>
-
         </form>
-
-    </div>
+      </div>
 
     
   </div>

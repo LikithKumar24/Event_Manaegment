@@ -17,8 +17,10 @@ import OrderSummary from './pages/OrderSummary'
 import PaymentSummary from './pages/PaymentSummary'
 import TicketPage from './pages/TicketPage'
 import CreatEvent from './pages/CreateEvent'
+import AdminDashboard from './pages/AdminDashboard'
 
-axios.defaults.baseURL = 'http://localhost:4000/';
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+axios.defaults.baseURL = apiBaseUrl;
 axios.defaults.withCredentials=true;
 
 function App() {
@@ -34,6 +36,7 @@ function App() {
         <Route path='/calendar' element={<CalendarView />} />
         <Route path='/wallet' element={<TicketPage />}/>
         <Route path='/event/:id/ordersummary' element = {<OrderSummary />} />
+        <Route path='/admin' element={<AdminDashboard />} />
       </Route>
 
       <Route path='/register' element={<RegisterPage />}/>
@@ -42,7 +45,6 @@ function App() {
       <Route path='/resetpassword' element = {<ResetPassword/>} />
       <Route path='/event/:id/ordersummary/paymentsummary' element = {<PaymentSummary />} />
       
-    
     </Routes>
     </UserContextProvider>  
   )
